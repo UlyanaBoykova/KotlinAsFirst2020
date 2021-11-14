@@ -9,6 +9,7 @@ import kotlin.math.max
 // Максимальное количество баллов = 14
 // Рекомендуемое количество баллов = 9
 // Вместе с предыдущими уроками = 33/47
+import kotlin.math.*
 
 /**
  * Пример
@@ -123,13 +124,9 @@ fun buildGrades(grades: Map<String, Int>): Map<Int, List<String>> {
  *   containsIn(mapOf("a" to "z"), mapOf("a" to "zee", "b" to "sweet")) -> false
  */
 fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean {
-    var f: Boolean
-    f = true
-    for ((key, value) in a) {
-        f = a[key] == b[key]
-        if (!f) break
-    }
-    return f
+    for ((key, value) in a)
+        if (value != b[key]) return false
+    return true
 }
 
 /**
@@ -146,10 +143,9 @@ fun containsIn(a: Map<String, String>, b: Map<String, String>): Boolean {
  *   subtractOf(a = mutableMapOf("a" to "z"), mapOf("a" to "z"))
  *     -> a changes to mutableMapOf() aka becomes empty
  */
-fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>): Map<String, String> {
-    for ((key, value) in b) {
-        if (a[key] == b[key]) a.remove(key)
-    }
+fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>): MutableMap<String, String> {
+    for ((key, value) in b)
+        if (value == a[key]) a.remove(key)
     return a
 }
 
@@ -161,17 +157,15 @@ fun subtractOf(a: MutableMap<String, String>, b: Map<String, String>): Map<Strin
  * т. е. whoAreInBoth(listOf("Марат", "Семён, "Марат"), listOf("Марат", "Марат")) == listOf("Марат")
  */
 fun whoAreInBoth(a: List<String>, b: List<String>): List<String> {
-    val i: Int
-    val j: Int
-    val set = mutableSetOf<String>()
-    for (i in 0 until a.count()) {
-        for (j in 0 until b.count()) {
-            if (a[i] == b[j]) set.add(a[i])
-        }
+    val result = mutableListOf<String>()
+    val a1 = a.toSet()
+    val b1 = b.toSet()
+    for (element in a1) {
+        if (element in b1) result += element
     }
-    return set.toList()
+    return result
 }
-
+// List<String> = a.intersect(b).toList()
 /**
  * Средняя (3 балла)
  *
@@ -301,7 +295,14 @@ fun canBuildFrom(chars: List<Char>, word: String): Boolean {
  * Например:
  *   extractRepeats(listOf("a", "b", "a")) -> mapOf("a" to 2)
  */
-fun extractRepeats(list: List<String>): Map<String, Int> = TODO()
+fun extractRepeats(list: List<String>): Map<String, Int> {
+    val result = mutableMapOf<String, Int>()
+    for (i in list.indices) {
+        if (result.containsKey(list[i])) result[list[i]] = result[list[i]]!! + 1
+        else result[list[i]] = 1
+    }
+    return result.filterValues { it > 1 }
+}
 
 /**
  * Средняя (3 балла)
@@ -315,7 +316,15 @@ fun extractRepeats(list: List<String>): Map<String, Int> = TODO()
  * Например:
  *   hasAnagrams(listOf("тор", "свет", "рот")) -> true
  */
-fun hasAnagrams(words: List<String>): Boolean = TODO()
+fun hasAnagrams(words: List<String>): Boolean {
+    if (words.size <= 1) return false
+    val firstWord = order(words[0])
+    for (i in 1 until words.size) {
+        if (order(words[i]) == firstWord) return true
+    }
+    return false
+}
+fun order(n: String): String = n.toCharArray().sorted().joinToString("")
 
 /**
  * Сложная (5 баллов)
@@ -371,15 +380,11 @@ fun propagateHandshakes(friends: Map<String, Set<String>>): Map<String, Set<Stri
  *   findSumOfTwo(listOf(1, 2, 3), 6) -> Pair(-1, -1)
  */
 fun findSumOfTwo(list: List<Int>, number: Int): Pair<Int, Int> {
-    val i: Int
-    val j: Int
-    var k = -1 to -1
     for (i in list.indices) {
-        for (j in i + 1 until list.size) {
-            if (list[i] + list[j] == number) k = i to j
-        }
+        if (number - list[i] in list && i != list.indexOf(number - list[i]))
+            return min(list.indexOf(number - list[i]), i) to max(list.indexOf(number - list[i]), i)
     }
-    return k
+    return Pair(-1, -1)
 }
 
 /**
