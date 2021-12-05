@@ -2,6 +2,7 @@
 
 package lesson6.task1
 
+import lesson5.task1.hasAnagrams
 
 // Урок 6: разбор строк, исключения
 // Максимальное количество баллов = 13
@@ -103,7 +104,16 @@ fun dateDigitToStr(digital: String): String = TODO()
  *
  * PS: Дополнительные примеры работы функции можно посмотреть в соответствующих тестах.
  */
-fun flattenPhoneNumber(phone: String): String = TODO()
+fun flattenPhoneNumber(phone: String): String {
+    var result = ""
+    for (i in phone.indices) {
+        if (phone[i] in "+123456789" && (phone.indexOf("+") == 0 || "+" !in phone)) {
+            result += phone[i].toString()
+        }
+    }
+    if (result.length >= 6) return result
+    return ""
+}
 
 /**
  * Средняя (5 баллов)
@@ -116,33 +126,15 @@ fun flattenPhoneNumber(phone: String): String = TODO()
  * При нарушении формата входной строки или при отсутствии в ней чисел, вернуть -1.
  */
 fun bestLongJump(jumps: String): Int {
-    val i: Int
-    var a = ""
-    var b = 0
-    var c = 0
-    for (i in jumps.indices) {
-        when {
-            (jumps[i] in "0123456789") && (i == jumps.length - 1)
-            -> {
-                a += jumps[i]
-                b = a.toInt()
-            }
-            (jumps[i] in "0123456789")
-            -> a += jumps[i]
-            ((jumps[i] == ' ') || (jumps[i] == '%') || (jumps[i] == '-')) -> {
-                b = if (a == "") 0
-                else a.toInt()
-                a = ""
-            }
-            else -> {
-                c = 0
-                break
-            }
-        }
-        if (b > c) c = b
-    }
-    if (c == 0) c = -1
-    return c
+    val results = jumps.split(Regex("""[\s\-%]"""))
+    var maxResult = -1
+    if (jumps.contains(Regex("""[^\d\s\-%)]""")) ||
+        jumps.contains(Regex("""([\-%])(-|%|\d)|(-|%|\d)([\-%])"""))) return -1
+
+    for (element in results)
+        if (element.isNotEmpty() && element.toInt() > maxResult)
+            maxResult = element.toInt()
+    return maxResult
 }
 
 /**
@@ -157,35 +149,15 @@ fun bestLongJump(jumps: String): Int {
  * вернуть -1.
  */
 fun bestHighJump(jumps: String): Int {
-    val i: Int
-    var n = ""
-    var a = ""
-    var b = 0
-    var c = 0
-    for (i in jumps.indices) {
-        if (jumps[i] != ' ') n += jumps[i]
-    }
-    for (i in 0..n.length - 1) {
-        when (n[i]){
-            in "0123456789" -> a += n[i]
-            '+' -> {
-                b = if (a == "") 0
-                else a.toInt()
-                a = ""
-            }
-            in " %-" -> {
-                b = 0
-                a = ""
-            }
-            else -> {
-                c = 0
-                break
-            }
-        }
-        if (b > c) c = b
-    }
-    if (c == 0) c = -1
-    return c
+    val results = Regex(""" """).split(jumps)
+    var maxResult = -1
+    if (jumps.contains(Regex("""[^\d\s\-+%)]""")) ||
+        jumps.contains(Regex("""([\-+%])(\d)|(\d)([\-+%])"""))) return -1
+
+    for (i in results.indices step 2)
+        if (results[i + 1] == "+" && results[i].toInt() > maxResult)
+            maxResult = results[i].toInt()
+    return maxResult
 }
 
 /**
@@ -197,7 +169,22 @@ fun bestHighJump(jumps: String): Int {
  * Вернуть значение выражения (6 для примера).
  * Про нарушении формата входной строки бросить исключение IllegalArgumentException
  */
-fun plusMinus(expression: String): Int = TODO()
+
+fun plusMinus(expression: String): Int {
+    if (!"$expression + ".matches(Regex("""(\d+ [+-] )+"""))) {
+        throw IllegalArgumentException(expression)
+    }
+    val currentExp = Regex(""" """).split(expression)
+    var first = currentExp[0].toInt()
+    var result = 0
+    for (i in 2 until currentExp.size step 2) {
+        result = if (currentExp[i - 1] == "+") currentExp[i].toInt() + first
+        else first - currentExp[i].toInt()
+        first = result
+    }
+    return result
+
+}
 
 /**
  * Сложная (6 баллов)
@@ -209,36 +196,13 @@ fun plusMinus(expression: String): Int = TODO()
  * Пример: "Он пошёл в в школу" => результат 9 (индекс первого 'в')
  */
 fun firstDuplicateIndex(str: String): Int {
-    var k = 0
-    var s = ""
-    var l = ""
-    var n = -1
-    var c = 0
-    for (i in str.indices) {
-        when {
-            (i == str.length - 1) -> {
-                if (s == "") {
-                    k = i
-                }
-                s += str[i].lowercaseChar()
-                k = i
-                n = k - l.length - 1
-                if (s == l) return n
-            }
-            ((str[i] != ' ') && (i != str.length - 1)) -> {
-                if (s == "") {
-                    k = i
-                }
-                s += str[i].lowercaseChar()
-            }
-            else -> {
-                k = i
-                if (s == l) return n
-                l = s
-                s = ""
-                n = k - l.length
-            }
-        }
+    val list = Regex(""" """).split(str)
+    var count = 0
+    if (list.size <= 1) return -1
+    if (list[0].equals(list[1], ignoreCase = true)) return 0
+    for (i in 1 until list.size) {
+        count += list[i - 1].length + 1
+        if (list[i].equals(list[i + 1], ignoreCase = true)) return count
     }
     return -1
 }
