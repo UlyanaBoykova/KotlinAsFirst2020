@@ -67,7 +67,7 @@ fun alignFile(inputName: String, lineLength: Int, outputName: String) {
 fun deleteMarked(inputName: String, outputName: String) {
     val writer = File(outputName).bufferedWriter()
     for (line in File(inputName).readLines()) {
-        if (((line.isNotEmpty()) && (line[0] != '_')) || (line.isEmpty())) {
+        if (line.isEmpty() || line.isNotEmpty() && line.indexOf("_") != 0) {
             writer.write(line)
             writer.appendLine()
         }
@@ -84,7 +84,9 @@ fun deleteMarked(inputName: String, outputName: String) {
  * Регистр букв игнорировать, то есть буквы е и Е считать одинаковыми.
  *
  */
-fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> = TODO()
+fun countSubstrings(inputName: String, substrings: List<String>): Map<String, Int> {
+    TODO()
+}
 
 
 /**
@@ -122,8 +124,26 @@ fun sibilants(inputName: String, outputName: String) {
  *
  */
 fun centerFile(inputName: String, outputName: String) {
-    TODO()
+    var max = 0
+    val writer = File(outputName).bufferedWriter()
+
+    for (line in File(inputName).readLines()) {
+        if (line.trim().length > max)
+            max = line.trim().length
+    }
+
+    for (line in File(inputName).readLines()) {
+        var spacesNum = (max - line.trim().length) / 2
+        while (spacesNum > 0) {
+            writer.write(" ")
+            spacesNum -= 1
+        }
+        writer.write(line.trim())
+        writer.newLine()
+    }
+    writer.close()
 }
+
 
 /**
  * Сложная (20 баллов)
@@ -153,7 +173,41 @@ fun centerFile(inputName: String, outputName: String) {
  * 8) Если входной файл удовлетворяет требованиям 1-7, то он должен быть в точности идентичен выходному файлу
  */
 fun alignFileByWidth(inputName: String, outputName: String) {
-    TODO()
+    val writer = File(outputName).bufferedWriter()
+    var max = 0
+    for (line in File(inputName).readLines()) {
+        val splLine = Regex("""" +""").replace(line, " ")
+        if (splLine.trim().length > max)
+            max = splLine.trim().length
+    }
+
+    for (line in File(inputName).readLines()) {
+        val splLine = Regex("""" +""").replace(line, " ")
+        val list = Regex("""\s""").split(splLine.trim()).toMutableList()
+        when {
+            (list.size == 1) -> {
+                writer.write(splLine.trim())
+                writer.newLine()
+            }
+            (line.isNotEmpty()) -> {
+                var currentLength = max - splLine.trim().length
+                var i = 0
+                while (currentLength > 0) {
+                    list[i] += " "
+                    if (i < list.size - 2)
+                        i += 1
+                    else
+                        i = 0
+                    currentLength -= 1
+                }
+                writer.write(list.joinToString(" "))
+                writer.newLine()
+            }
+            else -> writer.newLine()
+        }
+
+    }
+    writer.close()
 }
 
 /**
@@ -277,15 +331,15 @@ Suspendisse ~~et elit in enim tempus iaculis~~.
  *
  * Соответствующий выходной файл:
 <html>
-    <body>
-        <p>
-            Lorem ipsum <i>dolor sit amet</i>, consectetur <b>adipiscing</b> elit.
-            Vestibulum lobortis. <s>Est vehicula rutrum <i>suscipit</i></s>, ipsum <s>lib</s>ero <i>placerat <b>tortor</b></i>.
-        </p>
-        <p>
-            Suspendisse <s>et elit in enim tempus iaculis</s>.
-        </p>
-    </body>
+<body>
+<p>
+Lorem ipsum <i>dolor sit amet</i>, consectetur <b>adipiscing</b> elit.
+Vestibulum lobortis. <s>Est vehicula rutrum <i>suscipit</i></s>, ipsum <s>lib</s>ero <i>placerat <b>tortor</b></i>.
+</p>
+<p>
+Suspendisse <s>et elit in enim tempus iaculis</s>.
+</p>
+</body>
 </html>
  *
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
@@ -328,65 +382,65 @@ fun markdownToHtmlSimple(inputName: String, outputName: String) {
  *
  * Пример входного файла:
 ///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
-* Утка по-пекински
-    * Утка
-    * Соус
-* Салат Оливье
-    1. Мясо
-        * Или колбаса
-    2. Майонез
-    3. Картофель
-    4. Что-то там ещё
-* Помидоры
-* Фрукты
-    1. Бананы
-    23. Яблоки
-        1. Красные
-        2. Зелёные
+ * Утка по-пекински
+ * Утка
+ * Соус
+ * Салат Оливье
+1. Мясо
+ * Или колбаса
+2. Майонез
+3. Картофель
+4. Что-то там ещё
+ * Помидоры
+ * Фрукты
+1. Бананы
+23. Яблоки
+1. Красные
+2. Зелёные
 ///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
  *
  *
  * Соответствующий выходной файл:
 ///////////////////////////////начало файла/////////////////////////////////////////////////////////////////////////////
 <html>
-  <body>
-    <p>
-      <ul>
-        <li>
-          Утка по-пекински
-          <ul>
-            <li>Утка</li>
-            <li>Соус</li>
-          </ul>
-        </li>
-        <li>
-          Салат Оливье
-          <ol>
-            <li>Мясо
-              <ul>
-                <li>Или колбаса</li>
-              </ul>
-            </li>
-            <li>Майонез</li>
-            <li>Картофель</li>
-            <li>Что-то там ещё</li>
-          </ol>
-        </li>
-        <li>Помидоры</li>
-        <li>Фрукты
-          <ol>
-            <li>Бананы</li>
-            <li>Яблоки
-              <ol>
-                <li>Красные</li>
-                <li>Зелёные</li>
-              </ol>
-            </li>
-          </ol>
-        </li>
-      </ul>
-    </p>
-  </body>
+<body>
+<p>
+<ul>
+<li>
+Утка по-пекински
+<ul>
+<li>Утка</li>
+<li>Соус</li>
+</ul>
+</li>
+<li>
+Салат Оливье
+<ol>
+<li>Мясо
+<ul>
+<li>Или колбаса</li>
+</ul>
+</li>
+<li>Майонез</li>
+<li>Картофель</li>
+<li>Что-то там ещё</li>
+</ol>
+</li>
+<li>Помидоры</li>
+<li>Фрукты
+<ol>
+<li>Бананы</li>
+<li>Яблоки
+<ol>
+<li>Красные</li>
+<li>Зелёные</li>
+</ol>
+</li>
+</ol>
+</li>
+</ul>
+</p>
+</body>
 </html>
 ///////////////////////////////конец файла//////////////////////////////////////////////////////////////////////////////
  * (Отступы и переносы строк в примере добавлены для наглядности, при решении задачи их реализовывать не обязательно)
@@ -487,27 +541,90 @@ fun markdownToHtml(inputName: String, outputName: String) {
  * Вывести в выходной файл процесс умножения столбиком числа lhv (> 0) на число rhv (> 0).
  *
  * Пример (для lhv == 19935, rhv == 111):
-   19935
-*    111
+19935
+ *    111
 --------
-   19935
+19935
 + 19935
 +19935
 --------
- 2212785
+2212785
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  * Нули в множителе обрабатывать так же, как и остальные цифры:
-  235
-*  10
+235
+ *  10
 -----
-    0
+0
 +235
 -----
- 2350
+2350
  *
  */
 fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
-    TODO()
+    val writer = File(outputName).bufferedWriter()
+    var spaces = (lhv * rhv).toString().length + 1
+    val count = spaces
+
+    while (spaces - lhv.toString().length > 0) {
+        writer.write(" ")
+        spaces -= 1
+    }
+    writer.write("$lhv")
+    writer.newLine()
+    spaces = count
+
+    writer.write("*")
+    while (spaces - rhv.toString().length - 1 > 0) {
+        writer.write(" ")
+        spaces -= 1
+    }
+    writer.write("$rhv")
+    writer.newLine()
+    spaces = count
+
+    while (spaces > 0) {
+        writer.write("-")
+        spaces -= 1
+    }
+    writer.newLine()
+    spaces = count
+
+    val num = mutableListOf<Int>()
+    var rhvVar = rhv
+    while (rhvVar > 0) {
+        num += rhvVar % 10 * lhv
+        rhvVar /= 10
+    }
+    val numStr = num[0].toString()
+    while (spaces - numStr.length > 0) {
+        writer.write(" ")
+        spaces -= 1
+    }
+    writer.write(numStr)
+    writer.newLine()
+    spaces = count
+
+    for (i in 1 until num.size) {
+        spaces = count
+        writer.write("+")
+        while (spaces - num[1].toString().length - i - 1 > 0) {
+            writer.write(" ")
+            spaces -= 1
+        }
+        val bbb = num[i]
+        writer.write("$bbb")
+        writer.newLine()
+    }
+    while (spaces > 0) {
+        writer.write("-")
+        spaces -= 1
+    }
+    writer.newLine()
+
+    val result = rhv * lhv
+    writer.write(" $result")
+
+    writer.close()
 }
 
 
@@ -517,216 +634,146 @@ fun printMultiplicationProcess(lhv: Int, rhv: Int, outputName: String) {
  * Вывести в выходной файл процесс деления столбиком числа lhv (> 0) на число rhv (> 0).
  *
  * Пример (для lhv == 19935, rhv == 22):
-  19935 | 22
- -198     906
- ----
-    13
-    -0
-    --
-    135
-   -132
-   ----
-      3
+19935 | 22
+-198     906
+----
+13
+-0
+--
+135
+-132
+----
+3
 
  * Используемые пробелы, отступы и дефисы должны в точности соответствовать примеру.
  *
  */
+fun printLength(a: Int) = a.toString().length
+fun power(a: Int, b: Int) = 10.0.pow(a - b).toInt()
+
 fun printDivisionProcess(lhv: Int, rhv: Int, outputName: String) {
     val writer = File(outputName).bufferedWriter()
-    var vremenchastnoe = 0
-    var pervoevychet = 0
-    var m = 0
-    var vychet = 0
-    var poluch = 0
-    var ostat = 0
-    var ostat1 = 0
-    var dl = 0
-    var sled = 0
-    val koltsifr = digitNumber(lhv)
-    var k = koltsifr - 1
+    val numOfNumb = printLength(lhv)
+    var tempQuotient = 0
+    var lhvNum = numOfNumb - 1
+    var firstDivisible = 0
+
     if (lhv < rhv) {
-        pervoevychet = (lhv / (10.0.pow(k))).toInt() // число доступное для деления
-        vremenchastnoe = pervoevychet / rhv
+        firstDivisible = (lhv / (10.0.pow(lhvNum))).toInt()
+        tempQuotient = firstDivisible / rhv
     } else {
-        while (vremenchastnoe < 1) { // промежуточное частное
-            pervoevychet = (lhv / (10.0.pow(k))).toInt() // число доступное для деления
-            vremenchastnoe = pervoevychet / rhv
-            k--
+        while (tempQuotient < 1) {
+            firstDivisible = (lhv / (10.0.pow(lhvNum))).toInt()
+            tempQuotient = firstDivisible / rhv
+            lhvNum -= 1
         }
     }
-    vychet = vremenchastnoe * rhv
-    val pervayzifra = vychet / (10.0.pow((digitNumber(vychet) - 1))).toInt()
-    val pervayzifra1 = lhv / (10.0.pow((digitNumber(lhv) - 1))).toInt()
-    when {
-        ((lhv / rhv < 10) && (digitNumber(vychet) < digitNumber(lhv))) -> {
-            m = 1
-            writer.write("$lhv | $rhv")    // первая строка
-            writer.appendLine()
-            for (i in 1 until digitNumber(lhv) - digitNumber(vychet)) {
-                writer.write(" ")
-                m++
-            }
-        }
-        (pervayzifra > pervayzifra1) && (digitNumber(vychet) < digitNumber(lhv)) -> {
-            writer.write("$lhv | $rhv")    // первая строка
-            writer.appendLine()
-            m = 1
-        }
-        else -> {
-            writer.write(" $lhv | $rhv")    // первая строка
-            writer.appendLine()
-        }
-    }
-    writer.write("-$vychet")
-    for (i in 1..koltsifr - digitNumber(vychet) - m + 3) writer.write(" ")
-    poluch = lhv / rhv
-    writer.write("$poluch")
-    writer.appendLine()
 
-
-    if ((lhv / rhv < 10) && (digitNumber(vychet) < digitNumber(lhv))) {
-        for (i in 1..digitNumber(lhv)) writer.write("-")
-        writer.appendLine()
+    var firstAnswer = tempQuotient * rhv
+    var counter = 0
+    if ((lhv / rhv < 10) && (printLength(firstAnswer) < printLength(lhv))) {
+        counter = 1
+        writer.write("$lhv | $rhv")
+        writer.newLine()
+        for (j in 1 until printLength(lhv) - printLength(firstAnswer)) {
+            writer.write(" ")
+            counter += 1
+        }
     } else {
-        for (i in 1..digitNumber(vychet) + 1) writer.write("-")
-        writer.appendLine()
+        writer.write(" $lhv | $rhv")
+        writer.newLine()
     }
 
-    if ((lhv / rhv < 10) && (digitNumber(vychet) < digitNumber(lhv))) {
-        ostat = lhv - vychet
-    } else ostat = pervoevychet - vychet
-    for (i in 1..digitNumber(vychet) + 1 - digitNumber(ostat)) {
-        dl++
+    writer.write("-$firstAnswer")
+
+    for (i in 1..numOfNumb - printLength(firstAnswer) - counter + 3) writer.write(" ")
+    val nextAnswer: Int = lhv / rhv
+    writer.write("$nextAnswer")
+    writer.newLine()
+
+
+    if ((lhv / rhv < 10) && (printLength(firstAnswer) < printLength(lhv))) {
+        for (i in 1..printLength(lhv)) writer.write("-")
+        writer.newLine()
+    } else {
+        for (i in 1..printLength(firstAnswer) + 1) writer.write("-")
+        writer.newLine()
+    }
+
+    var remainder = if ((lhv / rhv < 10) && (printLength(firstAnswer) < printLength(lhv))) {
+        lhv - firstAnswer
+    } else firstDivisible - firstAnswer
+
+    counter = 0
+    for (i in 1..printLength(firstAnswer) - printLength(remainder) + 1) {
+        counter += 1
         writer.write(" ")
     }
+
+    var nextReminder = 0
     if (lhv / rhv < 10) {
-        writer.write("$ostat")
+        writer.write("$remainder")
     } else {
-        writer.write("$ostat")
-        ostat1 = ((lhv % 10.0.pow(koltsifr - digitNumber(pervoevychet))).toInt() /
-                (10.0.pow(koltsifr - digitNumber(pervoevychet) - 1))).toInt()
-        writer.write("$ostat1")
-        writer.appendLine()
+        writer.write("$remainder")
+        nextReminder = lhv % power(numOfNumb, printLength(firstDivisible)) /
+                power(numOfNumb, printLength(firstDivisible) + 1)
+        writer.write("$nextReminder")
+        writer.newLine()
     }
-    dl += digitNumber(ostat) + digitNumber(ostat1)
-    ostat = ostat * 10 + ostat1
-    sled = digitNumber(pervoevychet)
-    if (lhv / rhv < 10) sled = 1000
 
-    //---------------------------------------------------------
+    counter += printLength(remainder) + printLength(nextReminder)
+    remainder = remainder * 10 + nextReminder
+    var nextDivisible = printLength(firstDivisible)
+    if (lhv / rhv < 10) nextDivisible = 1000
 
-    var dl1 = 0
-    var dl2 = 0
-    while (koltsifr - sled > 0) {
-        sled++
-        vychet = (ostat / rhv) * rhv
-        for (i in 1..dl - 1 - digitNumber(vychet)) {
-            dl1++
+
+    var secCounter = 0
+    while (numOfNumb - nextDivisible > 0) {
+        nextDivisible += 1
+        firstAnswer = (remainder / rhv) * rhv
+        for (j in 1 until counter - printLength(firstAnswer)) {
+            secCounter += 1
             writer.write(" ")
         }
-        writer.write("-$vychet")
-        writer.appendLine()
+        writer.write("-$firstAnswer")
+        writer.newLine()
 
-        for (i in 1..min(dl1, dl - digitNumber(ostat))) writer.write(" ")
-        for (i in 1..max(digitNumber(vychet) + 1, digitNumber(ostat))) writer.write("-")
-        writer.appendLine()
-        dl = 0
+        for (i in 1..min(secCounter, counter - printLength(remainder))) writer.write(" ")
 
-        ostat -= vychet
-        for (i in 1..dl1 - digitNumber(ostat) + digitNumber(vychet) + 1) {
-            dl++
+        for (i in 1..max(printLength(firstAnswer) + 1, printLength(remainder))) writer.write("-")
+        writer.newLine()
+        counter = 0
+
+        remainder -= firstAnswer
+        for (i in 1..secCounter - printLength(remainder) + printLength(firstAnswer) + 1) {
+            counter += 1
             writer.write(" ")
         }
-        writer.write("$ostat")
+        writer.write("$remainder")
+
         when {
-            (koltsifr - sled == 1) -> {
-                ostat1 = lhv % (10.0.pow(koltsifr - sled)).toInt()
-                writer.write("$ostat1")
-                dl += digitNumber(ostat) + digitNumber(ostat1)
-                ostat = ostat * 10 + ostat1
-                writer.appendLine()
+            (numOfNumb - nextDivisible == 1) -> {
+                nextReminder = lhv % power(numOfNumb, nextDivisible)
+                writer.write("$nextReminder")
+                counter += printLength(remainder) + printLength(nextReminder)
+                remainder = remainder * 10 + nextReminder
+                writer.newLine()
             }
-            (koltsifr - sled == 0) -> {
-                ostat1 = lhv % (10.0.pow(koltsifr - sled)).toInt()
+            (numOfNumb - nextDivisible == 0) -> {
+                nextReminder = lhv % power(numOfNumb, nextDivisible)
             }
             else -> {
-                ostat1 = (lhv % (10.0.pow(koltsifr - sled)).toInt() / (10.0.pow(koltsifr - sled - 1))).toInt()
-                writer.write("$ostat1")
-                dl += digitNumber(ostat) + digitNumber(ostat1)
-                ostat = ostat * 10 + ostat1
-                writer.appendLine()
+                nextReminder = lhv % power(numOfNumb, nextDivisible) /
+                        (power(numOfNumb, nextDivisible + 1))
+                writer.write("$nextReminder")
+                counter += printLength(remainder) + printLength(nextReminder)
+                remainder = remainder * 10 + nextReminder
+                writer.newLine()
             }
         }
-        dl1 = 0
+        secCounter = 0
     }
-
     writer.close()
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-fun robot(inputName: String, moves: String): String {
-    var asterisks = 0
-    var x = 0
-    var y = 0
-    val freecells = mutableMapOf<Pair<Int, Int>, Int>()
-    val text = File(inputName).readLines()
-    for ((index1, line) in File(inputName).readLines().withIndex()) {
-        if (!line.matches("""([.*#]*)""".toRegex()))
-            throw IllegalArgumentException()
-        for ((index, value) in line.withIndex()) {
-            if (value == '*') {
-                x = index + 1
-                y = index1 + 1
-                asterisks++
-                freecells[Pair(x, y)] = 1
-            }
-            if (value == '.') {
-                freecells[Pair(index1 + 1, index + 1)] = 1
-            }
-        }
-        if ((index1 in text.indices) && (text[index1].length != text[0].length)) return "-1"
-        if (asterisks > 1) return "-1"
-    }
-    if (!moves.matches("""[ldur]*""".toRegex()))
-        throw IllegalArgumentException()
-    for (i in moves.indices) {
-        when {
-            (moves[i] == 'l') && (freecells[Pair(y, x - 1)] == 1) -> x -= 1
-            (moves[i] == 'r') && (freecells[Pair(y, x + 1)] == 1) -> x += 1
-            (moves[i] == 'u') && (freecells[Pair(y - 1, x)] == 1) -> y -= 1
-            (moves[i] == 'd') && (freecells[Pair(y + 1, x)] == 1) -> y += 1
-        }
-    }
-    val y1 = text.size + 1 - y
-    return "по горизонтали(x): $x, по вертикали(y): $y1"
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
