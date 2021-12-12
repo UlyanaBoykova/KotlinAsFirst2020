@@ -69,7 +69,7 @@ fun deleteMarked(inputName: String, outputName: String) {
     for (line in File(inputName).readLines()) {
         if (line.isEmpty() || line.isNotEmpty() && line.indexOf("_") != 0) {
             writer.write(line)
-            writer.appendLine()
+            writer.newLine()
         }
     }
     writer.close()
