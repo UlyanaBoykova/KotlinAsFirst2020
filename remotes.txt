@@ -1,0 +1,6 @@
+upstream        https://github.com/UlyanaBoykova/KotlinAsFirst2021.git (fetch)
+upstream        https://github.com/UlyanaBoykova/KotlinAsFirst2021.git (push)
+upstream-my     KotlinAsFirst2021-master (fetch)
+upstream-my     KotlinAsFirst2021-master (push)
+upstream-theirs https://github.com/AnufrievaVika/KotlinAsFirst2021.git (fetch)
+upstream-theirs https://github.com/AnufrievaVika/KotlinAsFirst2021.git (push)
